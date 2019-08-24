@@ -188,7 +188,7 @@ If two profiles have the same `D_filename` value then they share the same `D` ta
 
 You can disable autosaving and autoloading of table 'D' (for example, to avoid using alien `.EXE` and `.DLL` files on your machine):  
  1. Remove the assignment `D_filename = "..."` from `LGS_script_template.lua` line #184
- 2. (optional) Delete all `.DLL` file, all `.EXE` files and `D_SAVER.lua` from `C:\LGS extension`
+ 2. (optional) Delete all `.DLL` files, all `.EXE` files and `D_SAVER.lua` from `C:\LGS extension`
  3. (optional) Delete command `RUN_D_SAVER` from **Commands** pane in LGS application.
 
 
