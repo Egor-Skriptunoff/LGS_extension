@@ -218,6 +218,7 @@ D_SAVER.lua                 external script which actually writes table D to the
  - Press **OK** button to close the **Command Editor**
  - *Important note:* DO NOT bind this new command to any button, this action must not be used by a human.
 
+----
 
 If you want to install it (or to move) to another folder instead of `C:\LGS extension`, please specify your new folder name in the following two places:
  - in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233
