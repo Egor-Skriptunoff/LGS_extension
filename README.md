@@ -9,7 +9,7 @@ Five additional useful features are implemented:
  5. Global variable `D` in your Lua script is now a persistent Lua table: it is automatically saved to disk on profile exit and is automatically loaded from disk on profile start.
 
 Prior to using this template for writing your own LGS scripts, you have to copy some additional files to your disk.  
-See details in **How to install** section.
+See details in **How to install** section at the end of this README.
 
 ----
 
