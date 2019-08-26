@@ -1,17 +1,17 @@
 ---------------------------------------------------------------------------------------------
 -- LGS_script_template.lua
 ---------------------------------------------------------------------------------------------
--- Version: 2019-08-24
+-- Version: 2019-08-26
 -- Author:  Egor Skriptunoff
 -- License: MIT License
 --
--- This is a template for 'Logitech Gaming Software' script file.
--- Five additinal useful features are implemented here:
+-- This is a template for writing your own Lua scripts in the 'Logitech Gaming Software' programming environment.  
+-- Five additional useful features are implemented here:
 --   1. Function 'print()' now displays messages in the bottom window of the script editor, you can use it the same way as in original Lua;
 --   2. 'random()' is an improved drop-in replacement for 'math.random()': better random numbers quality, no need to explicitly set the seed;
---   3. LGS standard functions 'PressMouseButton()', 'IsMouseButtonPressed()', etc. now accept letters "L", "R", "M" (instead of numbers) for the first 3 mouse buttons;
+--   3. LGS standard functions 'PressMouseButton()', 'IsMouseButtonPressed()',... now accept strings "L", "R", "M" (instead of numbers) for the first 3 mouse buttons;
 --   4. You can get and set mouse coordinates in pixels: 'GetMousePositionInPixels()', 'SetMousePositionInPixels()';
---   5. Global variable 'D' is a persistent Lua table: it is automatically saved to disk on profile exit and is automatically loaded from disk on profile start.
+--   5. Global variable 'D' in your Lua script is now is a persistent Lua table: it is automatically saved to disk on profile exit and loaded from disk on profile start.
 --
 -- Prior to using this template for writing your own LGS scripts, you have to copy some additional files to your disk.
 -- See details in 'How to install' section at the line# 200 in this file.
@@ -23,8 +23,8 @@
 -- ------------------------------------------------------------------------------------------
 --    print(...)
 -- ------------------------------------------------------------------------------------------
--- Now this function displays messages in the bottom window of the script editor.
--- You can use 'print()' just like in standard Lua!
+-- This function is reimplemented to display messages in the bottom window of the script editor.
+-- You can use 'print()' just like you do in standard Lua!
 -- When using 'print()' instead of 'OutputLogMessage()', don't append "\n" to a message.
 --
 --
@@ -37,23 +37,23 @@
 --    random(m, n)           -- integer  m <= x <= n
 -- ------------------------------------------------------------------------------------------
 -- This new function is a drop-in replacement for standard Lua function 'math.random()'.
--- It generates different sequences of random numbers on every profile load, so you don't need to set the seed explicitly before using PRNG (like you did with 'math.randomseed').
--- The random number generator adsorbs entropy from every event processed by 'OnEvent()'.
+-- It generates different sequences of random numbers on every profile load, so you don't need to set the seed explicitly.
+-- The random number generator absorbs entropy from every event processed by 'OnEvent()'.
 -- It takes into account everything: event type, button index, mouse position on the screen, current date and running time.
--- This entropy is converted by SHAKE128 (SHA3 hash function) into stream of pseudo-random bits.
+-- This entropy is converted by SHAKE128 (SHA3 hash function) into a stream of pseudo-random bits.
 -- That's why function 'random()' returns random numbers having excellent statistical properties.
 -- Actually, after user clicked mouse buttons 100-200 times (no hurry please),
 -- these pseudo-random numbers might be considered cryptographically strong.
 --
--- The code example #2 (at the end of this file) shows how you could generate random alphanumeric strings.
--- It's fast and easy way to create new password of arbitrary length:
--- open text editor, press-and-release mouse button 7, then press-and-hold left mouse button until password length is enough.
---
+-- The code example #2 (at the end of this file) shows how you could generate random alphanumeric strings in Lua script.
+-- To use such generator, a user should open a text editor, press-and-release mouse button 7, then press-and-hold left mouse button
+-- until the string printed is lengthy enough.  This is an easy way to generate a strong password.
+-- 
 -- ------------------------------------------------------------------------------------------
 --    GetEntropyCounter()
 -- ------------------------------------------------------------------------------------------
--- This function returns estimation of lower bound of number of random bits consumed by random numbers mixer
--- (wait until it reaches 256 prior to generating crypto keys)
+-- This function returns estimation of lower bound of number of random bits consumed by random numbers mixer.
+-- Wait until it reaches 256 prior to generating crypto keys.
 --
 -- ------------------------------------------------------------------------------------------
 --    SHA3_224(message)
@@ -63,20 +63,20 @@
 --    SHAKE128(digest_size_in_bytes, message)
 --    SHAKE256(digest_size_in_bytes, message)
 -- ------------------------------------------------------------------------------------------
--- SHA3 hash functions are available.
--- The first four (SHA3_224, SHA3_256, SHA3_384, SHA3_512) generate message digest of fixed length
--- The last two (SHAKE128, SHAKE256) generate message digest of potentially infinite length
+-- I don't know why you might need them, but SHA3 hash functions are available :-)
+-- The first four (SHA3_224, SHA3_256, SHA3_384, SHA3_512) generate message digest of fixed length.
+-- The last two (SHAKE128, SHAKE256) generate message digest of potentially infinite length.
 -- Example: How to get SHA3-digest of your message:
 --    SHA3_224("The quick brown fox jumps over the lazy dog") == "d15dadceaa4d5d7bb3b48f446421d542e08ad8887305e28d58335795"
 --    SHAKE128(5, "The quick brown fox jumps over the lazy dog") == "f4202e3c58"
--- Example: How to convert your password into infinite sequence of very high quality random bytes (the same password will give the same sequence):
+-- Example: How to convert your short password into infinite sequence of very high quality pseudo-random bytes:
 --    -- start the sequence, initialize it with your password
 --    local get_hex_byte = SHAKE128(-1, "your password")
 --    while .... do
---       -- get next number from the inifinite sequence
+--       -- get next integer number from the inifinite sequence of pseudo-random bytes
 --       local next_random_byte  = tonumber(get_hex_byte(),  16)   -- integer  0 <= n <= 255
 --       local next_random_dword = tonumber(get_hex_byte(4), 16)   -- integer  0 <= n <= 4294967295
---       -- how to construct floating point number  0 <= x < 1
+--       -- construct floating point number  0 <= x < 1
 --       local next_random_float = (tonumber(get_hex_byte(3), 16) % 2^21 * 2^32 + tonumber(get_hex_byte(4), 16)) / 2^53
 --       ....
 --    end
@@ -159,10 +159,10 @@
 --
 --
 -- Important note:
---    The script 'GS_script_template.lua' requires one second for initialization.
+--    The script 'LGS_script_template.lua' requires one second for initialization.
 --    In other words, when this LGS profile is started, you will have to wait for 1 second before you're able to play.
 -- Explanation:
---    Every time this profile is activated and every time when your game changes the screen resolution
+--    Every time this profile is activated (and every time when your game changes the screen resolution)
 --    the process of automatic determination of screen resolution is restarted
 --    This is necessary for correct working of pixel-oriented mouse functions.
 --    This process takes about one second.
@@ -189,8 +189,8 @@ D_filename = "D_for_profile_1.lua"
 --
 -- You can turn feature #5 off (for example, to avoid using untrusted EXE and DLL files on your computer).
 -- To disable autosaving and autoloading of table 'D':
---    1) remove the line 'D_filename = ...' in this file (line# 184)
---    2) (optional) delete 4 files (LGS Debug Interceptor.dll, wluajit.exe, lua51.dll, D_SAVER.lua) from 'C:\LGS extension'
+--    1) remove the assignment 'D_filename = ...' from this file (line# 184)
+--    2) (optional) delete all the files from the folder 'C:\LGS extension' except the main module 'LGS_extension.lua'
 --    3) (optional) delete command 'RUN_D_SAVER' from 'Commands' pane in LGS application
 --
 --
@@ -200,12 +200,13 @@ D_filename = "D_for_profile_1.lua"
 -- How to install:
 -- ------------------------------------------------------------------------------------------
 --   1) Create folder 'C:\LGS extension'
---   2) Copy the following 5 files into the folder 'C:\LGS extension'                                (SHA256 sum)
+--   2) Copy the following first 5 files into the folder 'C:\LGS extension'                          (SHA256 sum)
 --          LGS_extension.lua           the main module                                              2D381537054CD37EF527919E291CAFBC5BEE6DD2B8DF16FAE9A18D01752A68B4
 --          LGS Debug Interceptor.dll   downloaded from https://gondwanasoftware.net.au/lgsdi.shtml  53D88679B0432887A6C676F4683FFF316E23D869D6479FEDEEEF2E5A3E71D334
 --          wluajit.exe                 windowless LuaJIT 2.1 x64 (doesn't create a console window)  E9C320E67020C2D85208AD449638BF1566C3ACE4CDA8024079B97C26833BF483
 --          lua51.dll                   LuaJIT DLL                                                   112CB858E8448B0E2A6A6EA5CF9A7C25CFD45AC8A8C1A4BA85ECB04B20C2DE88
 --          D_SAVER.lua                 external script which actually writes table D to the file    1E614F5F65473AFE172EE5FE9C25F11FA7D41B36F114CB02FC26D0A2540AACFD
+--          luajit.exe                  LuaJIT (console-ish, to view stderr if something goes wrong) 0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 --   3) Create new command:
 --          Run 'Logitech Gaming Software' application
 --          Open 'Customise buttons' tab
@@ -219,9 +220,8 @@ D_filename = "D_for_profile_1.lua"
 --          Important note: DO NOT bind this new command to any button, this action must not be used by a human.
 --
 --
---
 -- If you want to install it (or to move already installed) to another folder (instead of 'C:\LGS extension'),
--- please modify the folder name in two places:
+-- please specify your new folder name in the following two places:
 --    1) in the line 'extension_module_full_path = ...' in this file (line #233)
 --    2) in the properties of the command 'RUN_D_SAVER', the 'Working Directory' field
 --
@@ -245,7 +245,7 @@ dofile(extension_module_full_path)
 function OnEvent(event, arg, family)
    local mouse_button
    if event == "MOUSE_BUTTON_PRESSED" or event == "MOUSE_BUTTON_RELEASED" then
-      mouse_button = Logitech_order[arg] or arg  -- convert 1,2,3 to "L","R","M"
+      mouse_button = Logitech_order[arg] or arg  -- convert 'arg' (number) to 'mouse_button' (either a string "L","R","M" or a number 4, 5, 6, 7, 8...)
    elseif event == "PROFILE_ACTIVATED" then
       ClearLog()
       EnablePrimaryMouseButtonEvents(true)

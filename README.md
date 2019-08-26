@@ -1,6 +1,6 @@
 # LGS_extension
 `LGS_script_template.lua` is a template for writing your own Lua scripts in the Logitech Gaming Software programming environment.  
-Five additional useful features are implemented:
+Five additional useful features are implemented here:
 
  1. Function `print()` now displays messages in the bottom window of the script editor, you can use it the same way as in original Lua;
  2. `random()` is an improved drop-in replacement for `math.random()`: better random numbers quality, no need to explicitly set the seed;
@@ -37,7 +37,9 @@ This entropy is converted by SHAKE128 (SHA3 hash function) into a stream of pseu
 That's why function `random()` returns random numbers having excellent statistical properties.  
 Actually, after user clicked mouse buttons 100-200 times (no hurry please), these pseudo-random numbers might be considered cryptographically strong.  
 
-The code example #2 at the end of `LGS_script_template.lua` shows how you could generate random alphanumeric strings by an LGS Lua script.  To use such generator, a user should open a text editor, press-and-release mouse button 7, then press-and-hold left mouse button until the string printed is lengthy enough (this is an easy way to generate a strong password).
+The code example #2 at the end of `LGS_script_template.lua` shows how you could generate random alphanumeric strings in Lua script.  
+To use such generator, a user should open a text editor, press-and-release mouse button 7, then press-and-hold left mouse button until the string printed is lengthy enough.  
+This is an easy way to generate a strong password.
 
 ```lua
 GetEntropyCounter()
@@ -67,11 +69,11 @@ Example: How to convert your short password into infinite sequence of very high 
 -- start the sequence, initialize it with your password
 local get_hex_byte = SHAKE128(-1, "your password")
 while .... do
-   -- get next byte from the inifinite sequence
+   -- get next byte from the inifinite sequence of pseudo-random bytes
    local next_random_byte  = tonumber(get_hex_byte(),  16)   -- integer  0 <= n <= 255
-   -- get next dword from the inifinite sequence
+   -- get next dword from
    local next_random_dword = tonumber(get_hex_byte(4), 16)   -- integer  0 <= n <= 4294967295
-   -- get next floating point number from the inifinite sequence 0 <= x < 1
+   -- get next floating point number 0 <= x < 1
    local next_random_float = (tonumber(get_hex_byte(3), 16) % 2^21 * 2^32 + tonumber(get_hex_byte(4), 16)) / 2^53
    ....
 end
@@ -188,7 +190,7 @@ If two profiles have the same `D_filename` value then they share the same `D` ta
 
 You can disable autosaving and autoloading of table 'D' (for example, to avoid using alien `.EXE` and `.DLL` files on your machine):  
  1. Remove the assignment `D_filename = "..."` from `LGS_script_template.lua` line #184
- 2. (optional) Delete all `.DLL` files, all `.EXE` files and `D_SAVER.lua` from `C:\LGS extension`
+ 2. (optional) Delete all the files from the folder `C:\LGS extension` except the main module `LGS_extension.lua`
  3. (optional) Delete command `RUN_D_SAVER` from **Commands** pane in LGS application.
 
 
@@ -205,6 +207,7 @@ LGS Debug Interceptor.dll   downloaded from https://gondwanasoftware.net.au/lgsd
 wluajit.exe                 windowless LuaJIT 2.1 x64 (doesn't create a console window)  E9C320E67020C2D85208AD449638BF1566C3ACE4CDA8024079B97C26833BF483
 lua51.dll                   LuaJIT DLL                                                   112CB858E8448B0E2A6A6EA5CF9A7C25CFD45AC8A8C1A4BA85ECB04B20C2DE88
 D_SAVER.lua                 external script which actually writes table D to the file    1E614F5F65473AFE172EE5FE9C25F11FA7D41B36F114CB02FC26D0A2540AACFD
+luajit.exe                  LuaJIT (console-ish, to view stderr if something goes wrong) 0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 ```
  3. Create new command:
  - Run **Logitech Gaming Software** application
