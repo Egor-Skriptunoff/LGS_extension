@@ -1,7 +1,6 @@
 ---------------------------------------------------------------------------------------------
 -- LGS_extension.lua
 ---------------------------------------------------------------------------------------------
--- Version: 2019-08-24
 -- This module is invoked by "LGS_script_template.lua"
 -- The full path to this module must be assigned to variable "extension_module_full_path" (see "LGS_script_template.lua" line #233)
 
@@ -512,6 +511,12 @@ do
 
    end
 
+   local entropy_counter = 0
+
+   function GetEntropyCounter()
+      return floor(entropy_counter)
+   end
+
    local to_be_refined, to_be_refined_qty = {}, 0    -- buffer for entropy from user actions: 32-bit values, max 128 elements
    local refined, refined_qty = {}, 0                -- buffer for precalculated random numbers: 53-bit values, max 1024 elements
    local rnd_lanes = create_array_of_lanes()
@@ -583,12 +588,6 @@ do
          -- all bits except 3 highest might be considered random
          delta = delta * delta
          return delta < 25 and 0 or log(delta) / log4 - 3
-      end
-
-      local entropy_counter = 0
-
-      function GetEntropyCounter()
-         return floor(entropy_counter)
       end
 
       local prev_x, prev_y, prev_t
@@ -755,7 +754,7 @@ local function Sleep(delay_ms)
 end
 _G.Sleep = Sleep
 
-Logitech_order = {"L", "R", "M"}
+local Logitech_order = {"L", "R", "M"}
 local Microsoft_order = {L=1, M=2, R=3, l=1, m=2, r=3}
 
 local
@@ -781,7 +780,6 @@ end
 
 if D_filename then
 
-   local get_prefix_filename = "get_prefix.lua"
    local D_folder = extension_module_full_path:match"^(.-)[^\\/]*$"
 
    local function execute_Lua_script(filespec, err_message)
@@ -917,84 +915,75 @@ if D_filename then
          return
       end
       PlayMacro"RUN_D_SAVER"
-      local prefix, prepared_messages
+      local prefix = "ESk"
       local start_time = GetRunningTime()
-      repeat
-         local delay = 20
-         if not prepared_messages then
-            prepared_messages = {}
-            local current_message = {}
-            local current_message_length = 0
-            local chksum = 0
+      local prepared_messages = {}
+      local current_message = {}
+      local current_message_length = 0
+      local chksum = 0
 
-            local function flush_message()
-               if current_message_length > 0 then
-                  prepared_messages[#prepared_messages + 1] = char(unpack(current_message, 1, current_message_length))
-                  current_message_length = 0
-               end
-            end
-
-            function out94(b)
-               if current_message_length == 1000 then
-                  flush_message()
-               end
-               local L36 = chksum % 68719476736
-               local H17 = (chksum - L36) / 68719476736
-               chksum = L36 * 126611 + H17 * 505231 + b * 3083
-               b = b == 5 and 0x7E or b + 0x20
-               current_message_length = current_message_length + 1
-               current_message[current_message_length] = b
-            end
-
-            local data_to_send = {D, D_filename}
-            list_of_known_values[8] = data_to_send
-            known_value_to_list_index[data_to_send] = 8
-            repeat
-               local tbl = list_of_known_values[table.remove(stack_of_tables_to_parse)]
-               local next_arr_index = 1
-               repeat
-                  local value = tbl[next_arr_index]
-                  local tp = type(value)
-                  local ok = tp == "number" or tp == "string" or tp == "table" or tp == "boolean"
-                  if ok then
-                     next_arr_index = next_arr_index + 1
-                     PushValue(value, tp)
-                  end
-               until not ok
-               out94(93)
-               for key, value in pairs(tbl) do
-                  local tpk = type(key)
-                  if tpk == "string" or tpk == "table" or tpk == "boolean" or tpk == "number" and not (key > 0 and key < next_arr_index and key == floor(key)) then
-                     local tpv = type(value)
-                     if tpv == "number" or tpv == "string" or tpv == "table" or tpv == "boolean" then
-                        PushValue(key, tpk)
-                        PushValue(value, tpv)
-                     end
-                  end
-               end
-               out94(93)
-            until #stack_of_tables_to_parse == 0
-            local cs = chksum % 64847759419249
-            for _ = 1, 7 do
-               local b = cs % 94
-               cs = (cs - b) / 94
-               out94(b)
-            end
-            flush_message()
-            delay = 100 + start_time - GetRunningTime()
+      local function flush_message()
+         if current_message_length > 0 then
+            prepared_messages[#prepared_messages + 1] = char(unpack(current_message, 1, current_message_length))
+            current_message_length = 0
          end
-         if delay > 0 then
-            Sleep_orig(delay)
-         end
-         prefix = execute_Lua_script(D_folder..get_prefix_filename)
-      until prefix or GetRunningTime() - start_time > 1000
-      if prefix then
-         Sleep_orig(100)
-         for j, mes in ipairs(prepared_messages) do
-            OutputDebugMessage(prefix..(j == 1 and "-" or j % 10)..mes.."\n")
-         end
-         OutputDebugMessage"\n"
       end
+
+      function out94(b)
+         if current_message_length == 1000 then
+            flush_message()
+         end
+         local L36 = chksum % 68719476736
+         local H17 = (chksum - L36) / 68719476736
+         chksum = L36 * 126611 + H17 * 505231 + b * 3083
+         b = b == 5 and 0x7E or b + 0x20
+         current_message_length = current_message_length + 1
+         current_message[current_message_length] = b
+      end
+
+      local data_to_send = {D, D_filename}
+      list_of_known_values[8] = data_to_send
+      known_value_to_list_index[data_to_send] = 8
+      repeat
+         local tbl = list_of_known_values[table.remove(stack_of_tables_to_parse)]
+         local next_arr_index = 1
+         repeat
+            local value = tbl[next_arr_index]
+            local tp = type(value)
+            local ok = tp == "number" or tp == "string" or tp == "table" or tp == "boolean"
+            if ok then
+               next_arr_index = next_arr_index + 1
+               PushValue(value, tp)
+            end
+         until not ok
+         out94(93)
+         for key, value in pairs(tbl) do
+            local tpk = type(key)
+            if tpk == "string" or tpk == "table" or tpk == "boolean" or tpk == "number" and not (key > 0 and key < next_arr_index and key == floor(key)) then
+               local tpv = type(value)
+               if tpv == "number" or tpv == "string" or tpv == "table" or tpv == "boolean" then
+                  PushValue(key, tpk)
+                  PushValue(value, tpv)
+               end
+            end
+         end
+         out94(93)
+      until #stack_of_tables_to_parse == 0
+      local cs = chksum % 64847759419249
+      for _ = 1, 7 do
+         local b = cs % 94
+         cs = (cs - b) / 94
+         out94(b)
+      end
+      flush_message()
+      local delay = 700 + start_time - GetRunningTime()
+      if delay > 0 then
+         Sleep_orig(delay)
+      end
+      for j, mes in ipairs(prepared_messages) do
+         OutputDebugMessage(prefix..(j == 1 and "-" or j % 10)..mes.."\n")
+      end
+      OutputDebugMessage"\n"
    end
 
    local function enum_standard_tables(expr)
@@ -1026,3 +1015,5 @@ do
    assert(generator(5) == "f4202e3c58")  -- first 5 bytes
    assert(generator(4) == "52f9182a")    -- next 4 bytes, and so on...
 end
+
+_G.Logitech_order = Logitech_order

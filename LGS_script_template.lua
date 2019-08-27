@@ -1,11 +1,11 @@
 ---------------------------------------------------------------------------------------------
 -- LGS_script_template.lua
 ---------------------------------------------------------------------------------------------
--- Version: 2019-08-26
+-- Version: 2019-08-27
 -- Author:  Egor Skriptunoff
 -- License: MIT License
 --
--- This is a template for writing your own Lua scripts in the 'Logitech Gaming Software' programming environment.  
+-- This is a template for writing your own Lua scripts in the 'Logitech Gaming Software' programming environment.
 -- Five additional useful features are implemented here:
 --   1. Function 'print()' now displays messages in the bottom window of the script editor, you can use it the same way as in original Lua;
 --   2. 'random()' is an improved drop-in replacement for 'math.random()': better random numbers quality, no need to explicitly set the seed;
@@ -48,7 +48,7 @@
 -- The code example #2 (at the end of this file) shows how you could generate random alphanumeric strings in Lua script.
 -- To use such generator, a user should open a text editor, press-and-release mouse button 7, then press-and-hold left mouse button
 -- until the string printed is lengthy enough.  This is an easy way to generate a strong password.
--- 
+--
 -- ------------------------------------------------------------------------------------------
 --    GetEntropyCounter()
 -- ------------------------------------------------------------------------------------------
@@ -201,11 +201,11 @@ D_filename = "D_for_profile_1.lua"
 -- ------------------------------------------------------------------------------------------
 --   1) Create folder 'C:\LGS extension'
 --   2) Copy the following first 5 files into the folder 'C:\LGS extension'                          (SHA256 sum)
---          LGS_extension.lua           the main module                                              2D381537054CD37EF527919E291CAFBC5BEE6DD2B8DF16FAE9A18D01752A68B4
+--          LGS_extension.lua           the main module                                              3E59E96847FB3453020C7BEF01F63647B949750D62A9AF091EF2E0B4F7DE78DE
 --          LGS Debug Interceptor.dll   downloaded from https://gondwanasoftware.net.au/lgsdi.shtml  53D88679B0432887A6C676F4683FFF316E23D869D6479FEDEEEF2E5A3E71D334
 --          wluajit.exe                 windowless LuaJIT 2.1 x64 (doesn't create a console window)  E9C320E67020C2D85208AD449638BF1566C3ACE4CDA8024079B97C26833BF483
 --          lua51.dll                   LuaJIT DLL                                                   112CB858E8448B0E2A6A6EA5CF9A7C25CFD45AC8A8C1A4BA85ECB04B20C2DE88
---          D_SAVER.lua                 external script which actually writes table D to the file    1E614F5F65473AFE172EE5FE9C25F11FA7D41B36F114CB02FC26D0A2540AACFD
+--          D_SAVER.lua                 external script which actually writes table D to the file    0599D33E99AF27EE4625711DA6BF01EB2EA89BF38BF0A2FBD97ADF0ACB819BA3
 --          luajit.exe                  LuaJIT (console-ish, to view stderr if something goes wrong) 0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 --   3) Create new command:
 --          Run 'Logitech Gaming Software' application

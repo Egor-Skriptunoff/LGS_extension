@@ -1,5 +1,6 @@
-local get_prefix_filename = "get_prefix.lua"
-
+---------------------------------------------------------------------------------------------
+-- D_SAVER.lua
+---------------------------------------------------------------------------------------------
 local ipairs = ipairs
 local pairs = pairs
 local tonumber = tonumber
@@ -27,14 +28,13 @@ ffi.cdef[[
 typedef int (__stdcall *MessageCallbackType)(const char* message);
 typedef void (__stdcall *StatusCallbackType)(int status);
 int LGSDIConnectCallback(bool async, MessageCallbackType messageCallback, StatusCallbackType statusCallback);
-uint32_t GetCurrentProcessId();
 ]]
 
 local lgsdi = ffi.load"LGS Debug Interceptor"
 
 local arrived_data = {}
 local message_no
-local prefix = ""
+local prefix = "ESk"
 
 local function messageCallback(message)
    -- message contains only bytes 0x20..0x7E, without percent (0x25), this string was sent by 'OutputDebugMessage()' in LGS script
@@ -51,23 +51,8 @@ local function messageCallback(message)
    end
 end
 
-local pid = ffi.C.GetCurrentProcessId()
-for j = 1, 3 do
-   local c = pid % 26
-   pid = (pid - c) / 26
-   prefix = prefix..string.char(c + 0x41 + j % 2 * 0x20)
-end
-
--- create prefix file in the current directory
-local file = io.open(get_prefix_filename, "wb")
-file:write('return "'..prefix..'"')
-file:close()
-
 -- Receive all messages through callback function
 lgsdi.LGSDIConnectCallback(false, messageCallback, function() end)
-
--- delete prefix file from the current directory
-os.remove(get_prefix_filename)
 
 -- process arrived data
 local queue
