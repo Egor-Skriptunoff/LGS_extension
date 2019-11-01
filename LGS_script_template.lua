@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------------------------
 -- LGS_script_template.lua
 ---------------------------------------------------------------------------------------------
--- Version: 2019-08-27
+-- Version: 2019-11-01
 -- Author:  Egor Skriptunoff
 -- License: MIT License
 --
@@ -341,14 +341,29 @@ function OnEvent(event, arg, family)
 
       -- (this is code example #1, remove it after reading or testing)
       -- move mouse cursor along a circle
-      local R = 50
-      local x, y = GetMousePositionInPixels()
-      x = x + R  -- (x,y) = center
-      for j = 1, 90 do
-         local angle = (2 * math.pi) * (j / 90)
-         SetMousePositionInPixels(x - R * math.cos(angle), y - R * math.sin(angle))
-         Sleep()
+      local R = 50  -- the radius
+      if IsModifierPressed"Shift" then
+         -- with Shift pressed, the mouse is moving CCW using MoveMouseRelative()
+         local prev_x, prev_y = R, 0
+         for j = 1, 90 do
+            local angle = (2 * math.pi) * (j / 90)
+            local x = math.floor( R * math.cos(angle) + 0.5)
+            local y = math.floor(-R * math.sin(angle) + 0.5)
+            MoveMouseRelative(x - prev_x, y - prev_y)
+            prev_x, prev_y = x, y
+            Sleep()
+         end
+      else
+         -- without Shift, the mouse is moving CW using SetMousePositionInPixels()
+         local x_center, y_center = GetMousePositionInPixels()
+         x_center = x_center + R
+         for j = 1, 90 do
+            local angle = (2 * math.pi) * (j / 90)
+            SetMousePositionInPixels(x_center - R * math.cos(angle), y_center - R * math.sin(angle))
+            Sleep()
+         end
       end
+      -- actual radii of these two circles (CW and CCW) may appear different due to quirks of MoveMouseRelative()
       -- (end of code example #1)
 
    end
