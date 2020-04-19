@@ -1,5 +1,5 @@
 # LGS_extension
-`LGS_script_template.lua` is a template for writing your own Lua scripts in the Logitech Gaming Software programming environment.  
+`LGS_script_template.lua` is a template for writing your own Lua scripts in the Logitech Gaming Software programming environment (despite the name, both LGS and GHUB are supported).  
 Five additional useful features are implemented here:
 
  1. Function `print()` now displays messages in the bottom window of the script editor, you can use it the same way as in original Lua;
@@ -150,7 +150,7 @@ The **Acceleration** flag is set by default, so this problem hits every user who
 Meanwhile the new functions `GetMousePositionInPixels` and `SetMousePositionInPixels` work fine independently of **Acceleration** flag.
 
 *Important note:*  
-Don't forget that you must wait a bit, for example `Sleep(5)`, after simulating any of the following actions:
+Don't forget that you must wait a bit, for example `Sleep(10)`, after simulating any of the following actions:
 
  - mouse move,
  - button press,
@@ -188,10 +188,10 @@ This file will be located in the `C:\LGS extension` folder and will contain huma
 If two profiles have the same `D_filename` value then they share the same `D` table, that's why you might want to make these filenames different for every profile.  
 
 
-You can disable autosaving and autoloading of table 'D' (for example, to avoid using alien `.EXE` and `.DLL` files on your machine):  
+You can disable autosaving and autoloading of table `D` (for example, to avoid using my .EXE and .DLL files on your machine):  
  1. Remove the assignment `D_filename = "..."` from `LGS_script_template.lua` line #184
  2. (optional) Delete all the files from the folder `C:\LGS extension` except the main module `LGS_extension.lua`
- 3. (optional) Delete command `RUN_D_SAVER` from **Commands** pane in LGS application.
+ 3. (optional) Delete the command **RUN_D_SAVER** from LGS/GHUB application.
 
 
 ----
@@ -209,21 +209,40 @@ lua51.dll                   LuaJIT DLL                                          
 D_SAVER.lua                 external script which actually writes table D to the file    0599D33E99AF27EE4625711DA6BF01EB2EA89BF38BF0A2FBD97ADF0ACB819BA3
 luajit.exe                  LuaJIT (console-ish, to view stderr if something goes wrong) 0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 ```
- 3. Create new command:
- - Run **Logitech Gaming Software** application
- - Open **Customise buttons** tab
- - Select profile
- - In the left side you will see the **Commands** pane (list of bindable actions such as keyboard keys, macros, etc), press the big plus sign to add new command.
- - In the **Command Editor**, select the **Shortcut** in the left pane
- - Set the 1st text field **Name** to `RUN_D_SAVER`
- - Set the 2nd text field **Enter a shortcut** to `wluajit.exe D_SAVER.lua`
- - Set the 3rd text field **Working Directory** to `C:\LGS extension`
- - Press **OK** button to close the **Command Editor**
- - *Important note:* DO NOT bind this new command to any button, this action must not be used by a human.
+ 3. Create new command, the instructions are different for LGS and GHUB:
+    * In **LGS**:
+      - Run **Logitech Gaming Software** application
+      - Open **Customise buttons** tab
+      - Select profile
+      - In the left side you will see the **Commands** pane (list of bindable actions such as keyboard keys, macros, etc), press the big plus sign to add new command
+      - In the **Command Editor**, select the **Shortcut** in the left pane
+      - Set the 1st text field **Name** to `RUN_D_SAVER`
+      - Set the 2nd text field **Enter a shortcut** to `wluajit.exe D_SAVER.lua`
+      - Set the 3rd text field **Working Directory** to `C:\LGS extension`
+      - Press **OK** button to close the **Command Editor**
+      - *Important note:*  
+DO NOT bind the **RUN_D_SAVER** command to any button, this action must not be used by a human.
+    * In **GHUB**:
+      - Run **G HUB** application
+      - Click on the mouse picture to open **Gear page**
+      - Select **Assignments** icon (plus-inside-square) at the left edge
+      - Select **SYSTEM** tab (it's the last one in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
+      - Click **ADD APPLICATION** under the **Launch Application** list, a file selection dialogue window will appear
+      - Find the file `C:\LGS extension\luajit.exe` and click it
+      - Change the **NAME** parameter from `luajit` to `RUN_D_SAVER`
+      - Click **ADD ARGUMENTS** and replace `New argument` with `D_SAVER.lua`
+      - Click **SAVE**
+      - Now you will see the **RUN_D_SAVER** command under the **Launch Application** list.  
+NEVER manually assign this command to any button, this action must not be used by a human.
 
 ----
 
-If you want to install it (or to move) to another folder instead of `C:\LGS extension`, please specify your new folder name in the following two places:
+If you want to move `C:\LGS extension` to another folder, please specify your new folder path in the following two places:
  - in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233
- - in the properties of the command `RUN_D_SAVER`, the **Working Directory** field
-
+ - in the properties of the command **RUN_D_SAVER**:
+   * In **LGS**:
+     - change the 3rd text field **Working Directory**
+   * In **GHUB**:
+     - click **CHANGE** near the **PATH** field
+     - select the file `luajit.exe` located in your new folder
+     - click **ADD ARGUMENTS** and replace `New argument` with `D_SAVER.lua`
