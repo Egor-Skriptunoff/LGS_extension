@@ -1,5 +1,6 @@
 # LGS_extension
-`LGS_script_template.lua` is a template for writing your own Lua scripts in the Logitech Gaming Software programming environment (despite the name, both LGS and GHUB are supported).  
+`LGS_script_template.lua` is a template for writing your own Lua scripts in the Logitech Gaming Software programming environment.  
+Despite the name, both LGS and GHUB are supported.  
 Five additional useful features are implemented here:
 
  1. Function `print()` now displays messages in the bottom window of the script editor, you can use it the same way as in original Lua;
@@ -187,12 +188,10 @@ Replace `profile_1` with current profile name (use only English letters and digi
 This file will be located in the `C:\LGS extension` folder and will contain human-readable data.  
 If two profiles have the same `D_filename` value then they share the same `D` table, that's why you might want to make these filenames different for every profile.  
 
-
 You can disable autosaving and autoloading of table `D` (for example, to avoid using my .EXE and .DLL files on your machine):  
  1. Remove the assignment `D_filename = "..."` from `LGS_script_template.lua` line #184
  2. (optional) Delete all the files from the folder `C:\LGS extension` except the main module `LGS_extension.lua`
  3. (optional) Delete the command **RUN_D_SAVER** from LGS/GHUB application.
-
 
 ----
 
@@ -200,7 +199,7 @@ You can disable autosaving and autoloading of table `D` (for example, to avoid u
 
 #### Step 1. Create folder `C:\LGS extension`
 
-#### Step 2. Copy the following 5 files into the folder `C:\LGS extension`
+#### Step 2. Copy the following 6 files into the folder `C:\LGS extension`
  ```
 Filename                    Description                                                  SHA256 sum
 --------                    -----------                                                  ----------
@@ -247,17 +246,16 @@ DO NOT bind the **RUN_D_SAVER** command to any button, this action must not be u
     - Click **DELETE**
     - Click **YES** to confirm
     - *Important note:*  
-Now you have the **RUN_D_SAVER** command on the **MACROS** tab  
+Now you have the **RUN_D_SAVER** command on the **MACROS** tab.  
 NEVER manually assign this command to any button, this action must not be used by a human.
 
 #### Step 4. Use `LGS_script_template.lua` as a template for writing your own Lua script
 
-
 ----
 
 ### How to move the folder `C:\LGS extension` to another location
- - Move all the files from `C:\LGS extension` to your new folder
- - Specify your new folder path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233
+ - Move all the files from `C:\LGS extension` to your new folder.
+ - Specify your new folder path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` at the line #233. If your new folder path contains non-English letters then make sure you're using Windows ANSI codepage in the text editor, not UTF-8.
  - Modify the command **RUN_D_SAVER**:
    * In **LGS**:
      - Edit the command **RUN_D_SAVER** and write your new folder path to the 3rd text field **Working Directory**
@@ -267,4 +265,4 @@ NEVER manually assign this command to any button, this action must not be used b
      - Click **MACRO OPTIONS** in the top right corner
      - Click **DELETE THIS MACRO**
      - Click **YES** to confirm
-     - Create the command **RUN_D_SAVER** again: follow the instructions in _"Step 3. Create new command"_ from _"How to install"_ section above, but use your new folder path instead of `C:\LGS extension`
+     - Create the command **RUN_D_SAVER** again: follow the instructions from _"Step 3. Create new command"_ in _"How to install"_ section above, but use your new folder path instead of `C:\LGS extension`
