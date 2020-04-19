@@ -223,7 +223,7 @@ The instructions are different for LGS and GHUB:
     - Set the 3rd text field **Working Directory** to `C:\LGS extension`
     - Press **OK** button to close the **Command Editor**
     - *Important note:*  
-DO NOT bind the **RUN_D_SAVER** command to any button, this action must not be used by a human.
+DO NOT bind the **RUN_D_SAVER** command to any button, this command must not be invoked by a human.
   * In **GHUB**:
     - Run **G HUB** application
     - Click on the mouse picture to open **Gear page**
@@ -246,8 +246,8 @@ DO NOT bind the **RUN_D_SAVER** command to any button, this action must not be u
     - Click **DELETE**
     - Click **YES** to confirm
     - *Important note:*  
-Now you have the **RUN_D_SAVER** command on the **MACROS** tab.  
-NEVER manually assign this command to any button, this action must not be used by a human.
+Now you have the **RUN_D_SAVER** macro on the **MACROS** tab.  
+NEVER manually assign this macro to any button, this macro must not be invoked by a human.
 
 #### Step 4. Use `LGS_script_template.lua` as a template for writing your own Lua script
 
