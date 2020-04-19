@@ -197,8 +197,10 @@ You can disable autosaving and autoloading of table `D` (for example, to avoid u
 ----
 
 # How to install:
- 1. Create folder `C:\LGS extension`
- 2. Copy the following 5 files into the folder `C:\LGS extension`  
+
+#### Step 1. Create folder `C:\LGS extension`
+
+#### Step 2. Copy the following 5 files into the folder `C:\LGS extension`
  ```
 Filename                    Description                                                  SHA256 sum
 --------                    -----------                                                  ----------
@@ -209,40 +211,60 @@ lua51.dll                   LuaJIT DLL                                          
 D_SAVER.lua                 external script which actually writes table D to the file    0599D33E99AF27EE4625711DA6BF01EB2EA89BF38BF0A2FBD97ADF0ACB819BA3
 luajit.exe                  LuaJIT (console-ish, to view stderr if something goes wrong) 0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 ```
- 3. Create new command, the instructions are different for LGS and GHUB:
-    * In **LGS**:
-      - Run **Logitech Gaming Software** application
-      - Open **Customise buttons** tab
-      - Select profile
-      - In the left side you will see the **Commands** pane (list of bindable actions such as keyboard keys, macros, etc), press the big plus sign to add new command
-      - In the **Command Editor**, select the **Shortcut** in the left pane
-      - Set the 1st text field **Name** to `RUN_D_SAVER`
-      - Set the 2nd text field **Enter a shortcut** to `wluajit.exe D_SAVER.lua`
-      - Set the 3rd text field **Working Directory** to `C:\LGS extension`
-      - Press **OK** button to close the **Command Editor**
-      - *Important note:*  
+#### Step 3. Create new command
+The instructions are different for LGS and GHUB:  
+  * In **LGS**:
+    - Run **Logitech Gaming Software** application
+    - Open **Customise buttons** tab
+    - Select profile
+    - In the left side you will see the **Commands** pane (list of bindable actions such as keyboard keys, macros, etc), press the big plus sign to add new command
+    - In the **Command Editor**, select the **Shortcut** in the left pane
+    - Set the 1st text field **Name** to `RUN_D_SAVER`
+    - Set the 2nd text field **Enter a shortcut** to `wluajit.exe D_SAVER.lua`
+    - Set the 3rd text field **Working Directory** to `C:\LGS extension`
+    - Press **OK** button to close the **Command Editor**
+    - *Important note:*  
 DO NOT bind the **RUN_D_SAVER** command to any button, this action must not be used by a human.
-    * In **GHUB**:
-      - Run **G HUB** application
-      - Click on the mouse picture to open **Gear page**
-      - Select **Assignments** icon (plus-inside-square) at the left edge
-      - Select **SYSTEM** tab (it's the last one in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
-      - Click **ADD APPLICATION** under the **Launch Application** list, a file selection dialogue window will appear
-      - Find the file `C:\LGS extension\luajit.exe` and click it
-      - Change the **NAME** parameter from `luajit` to `RUN_D_SAVER`
-      - Click **ADD ARGUMENTS** and replace `New argument` with `D_SAVER.lua`
-      - Click **SAVE**
-      - Now you will see the **RUN_D_SAVER** command under the **Launch Application** list.  
+  * In **GHUB**:
+    - Run **G HUB** application
+    - Click on the mouse picture to open **Gear page**
+    - Select **Assignments** icon (plus-inside-square) at the left edge
+    - Select **SYSTEM** tab (it's the last one in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
+    - Click **ADD APPLICATION** under the **Launch Application** list, a file selection dialogue window will appear
+    - Find the file `C:\LGS extension\luajit.exe` and click it
+    - Click **ADD ARGUMENTS** and replace `New argument` with `D_SAVER.lua`
+    - Click **SAVE**
+    - Select **MACROS** tab (in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
+    - Click **CREATE NEW MACRO**
+    - Set `RUN_D_SAVER` as macro name
+    - Select **NO REPEAT** type of macro
+    - Click **START NOW**
+    - Click **LAUNCH APPLICATION**
+    - Select **luajit**
+    - Click **SAVE**
+    - Select **SYSTEM** tab (in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
+    - Click on **luajit** to enter macro editor
+    - Click **DELETE**
+    - Click **YES** to confirm
+    - *Important note:*  
+Now you have the **RUN_D_SAVER** command on the **MACROS** tab  
 NEVER manually assign this command to any button, this action must not be used by a human.
+
+#### Step 4. Use `LGS_script_template.lua` as a template for writing your own Lua script
+
 
 ----
 
-If you want to move `C:\LGS extension` to another folder, please specify your new folder path in the following two places:
- - in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233
- - in the properties of the command **RUN_D_SAVER**:
+### How to move the folder `C:\LGS extension` to another location
+ - Move all the files from `C:\LGS extension` to your new folder
+ - Specify your new folder path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233
+ - Modify the command **RUN_D_SAVER**:
    * In **LGS**:
-     - change the 3rd text field **Working Directory**
+     - Edit the command **RUN_D_SAVER** and write your new folder path to the 3rd text field **Working Directory**
    * In **GHUB**:
-     - click **CHANGE** near the **PATH** field
-     - select the file `luajit.exe` located in your new folder
-     - click **ADD ARGUMENTS** and replace `New argument` with `D_SAVER.lua`
+     - Select **MACROS** tab (in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
+     - Click **RUN_D_SAVER** to enter macro editor
+     - Click **MACRO OPTIONS** in the top right corner
+     - Click **DELETE THIS MACRO**
+     - Click **YES** to confirm
+     - Create the command **RUN_D_SAVER** again: follow the instructions in _"Step 3. Create new command"_ from _"How to install"_ section above, but use your new folder path instead of `C:\LGS extension`
