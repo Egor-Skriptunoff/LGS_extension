@@ -254,10 +254,9 @@ NEVER manually assign this macro to any button, this macro must not be invoked b
 ----
 
 ### How to move the folder `C:\LGS extension` to another location
+The path to your new folder must not contain non-English letters. Only ASCII-7 characters are allowed in the path.
  - Move all the files from `C:\LGS extension` to your new folder.
- - Specify your new folder path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` at the line #233.  
-If your new folder path contains non-English letters then make sure you're using Windows ANSI codepage in a text editor, not UTF-8.  
-_Please note that with GHUB you're unable to use folder with non-English letters in its path. This is due to ridiculous bug in GHUB script editor: a Lua script is loaded in Windows ANSI codepage but is saved in UTF-8 codepage. The workaround: never use internal GHUB script editor; instead edit your Lua scripts `%LOCALAPPDATA%\LGHUB\scripts\<GUID>\script.lua` with external text editor (for example, `notepad`)._
+ - Change the path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233.
  - Modify the command **RUN_D_SAVER**:
    * In **LGS**:
      - Edit the command **RUN_D_SAVER** and write your new folder path to the 3rd text field **Working Directory**
