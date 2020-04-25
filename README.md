@@ -38,9 +38,9 @@ This entropy is converted by SHAKE128 (SHA3 hash function) into a stream of pseu
 That's why function `random()` returns random numbers having excellent statistical properties.  
 Actually, after user clicked mouse buttons 100-200 times (no hurry please), these pseudo-random numbers might be considered cryptographically strong.  
 
-The code example #2 at the end of `LGS_script_template.lua` shows how you could generate random alphanumeric strings in Lua script.  
-To use such generator, a user should open a text editor, press-and-release mouse button 7, then press-and-hold left mouse button until the string printed is lengthy enough.  
-This is an easy way to generate a strong password.
+The code example #1 at the end of `LGS_script_template.lua` shows how you could simulate typing random alphanumeric string in Lua script.  
+A user should open a text editor and press-and-hold middle mouse button until the string is long enough.  
+This is the easiest way to generate a strong password.
 
 ```lua
 GetEntropyCounter()
