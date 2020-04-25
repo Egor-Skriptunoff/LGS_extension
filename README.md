@@ -1,6 +1,6 @@
 # LGS_extension
 `LGS_script_template.lua` is a template for writing your own Lua scripts in the Logitech Gaming Software programming environment.  
-Despite the name, both LGS and GHUB are supported.  
+Both **LGS** and **GHUB** are supported.  
 Five additional useful features are implemented here:
 
  1. Function `print()` now displays messages in the bottom window of the script editor, you can use it the same way as in original Lua;
@@ -72,10 +72,10 @@ local get_hex_byte = SHAKE128(-1, "your password")
 while .... do
    -- get next byte from the inifinite sequence of pseudo-random bytes
    local next_random_byte  = tonumber(get_hex_byte(),  16)   -- integer  0 <= n <= 255
-   -- get next dword from
+   -- get next dword
    local next_random_dword = tonumber(get_hex_byte(4), 16)   -- integer  0 <= n <= 4294967295
    -- get next floating point number 0 <= x < 1
-   local next_random_float = (tonumber(get_hex_byte(3), 16) % 2^21 * 2^32 + tonumber(get_hex_byte(4), 16)) / 2^53
+   local next_random_double = (tonumber(get_hex_byte(3), 16) % 2^21 * 2^32 + tonumber(get_hex_byte(4), 16)) / 2^53
    ....
 end
 ```
@@ -127,7 +127,7 @@ GetMousePositionInPixels()
 SetMousePositionInPixels(x,y)
 ```
 You can now get and set mouse cursor position **in pixels**.  
-`GetMousePositionInPixels()` returns 6 values (probably you would need only the first two):
+`GetMousePositionInPixels()` returns 6 values (you would probably need only the first two):
 ```
 x_in_pixels,              -- integer from 0 to (screen_width-1)
 y_in_pixels,              -- integer from 0 to (screen_height-1)
@@ -137,7 +137,7 @@ x_64K,                    -- normalized x coordinate 0..65535, this is the first
 y_64K                     -- normalized y coordinate 0..65535, this is the second value returned by 'GetMousePosition()'
 ```
 We already have standard LGS function `MoveMouseRelative()` which operates with distance in pixels, but it has two problems.  
-The first problem: `MoveMouseRelative` is limited to narrow distance range: from -127 to +127 pixels from current position.
+The first problem: `MoveMouseRelative` is limited to narrow distance range: from -127 to +127 pixels from the current position.
 ``` 
 MoveMouseRelative(300, 300)  -- This invocation will work incorrectly because 300 is greater than 127
 ```
@@ -146,7 +146,7 @@ Now you can move mouse cursor farther than 127 pixels away using the new functio
 local current_x, current_y = GetMousePositionInPixels()
 SetMousePositionInPixels(current_x + 300, current_y + 300)
 ```
-The second problem with `MoveMouseRelative` is that it works incorrectly when **Acceleration (Enhance Pointer Precision)** flag is checked in **Pointer settings** tab (this is the third icon from the left at the bottom of the LGS application window): the real distance (how far mouse pointer moves after you have invoked the function) does not equal to the number of pixels requested in the arguments of `MoveMouseRelative`.  
+The second problem with `MoveMouseRelative` is that it works incorrectly when **Acceleration (Enhance Pointer Precision)** flag is checked in **Pointer settings** tab (this is the third icon from the left at the bottom of the LGS application window): the real distance (how far the mouse pointer moves after you have invoked the function) does not equal to the number of pixels requested in the arguments of `MoveMouseRelative`.  
 The **Acceleration** flag is set by default, so this problem hits every user who tries to use `MoveMouseRelative` in his scripts.  
 Meanwhile the new functions `GetMousePositionInPixels` and `SetMousePositionInPixels` work fine independently of **Acceleration** flag.
 
@@ -157,7 +157,7 @@ Don't forget that you must wait a bit, for example `Sleep(10)`, after simulating
  - button press,
  - button release.
  
-In other words, if you read `GetMousePositionInPixels` right after invocation of `SetMousePositionInPixels` without a `Sleep` in between, you will get the old mouse coordinates instead of new ones.  
+In other words, if you read `GetMousePositionInPixels` right after invocation of `SetMousePositionInPixels` without a `Sleep` in between, you will get the old mouse coordinates instead of the new ones.  
 This is because Windows needs some time to perform your simulation request.  
 Windows messaging system works slowly, there is nothing you can do to make the simulations instant.
 
@@ -179,17 +179,17 @@ Table `D` is allowed to contain only simple types: strings, numbers, booleans an
 Circular table refrences (non-tree tables) are allowed, for example: `D.a={}; D.b={}; D.a.next=D.b; D.b.prev=D.a`  
 Functions, userdatum and metatables will not be saved to disk (they will be silently replaced with nils), so don't store functions inside `D`.  
 
-The table `D` data will be stored in a file; and you should give a name for this file.  
-By default the line #184 in `LGS_script_template.lua` looks like the following:
+The table `D` data will be stored in a file; you should give it a name.  
+By default the line #187 in `LGS_script_template.lua` looks like the following:
 ```lua
 D_filename = "D_for_profile_1.lua"
 ```
 Replace `profile_1` with current profile name (use only English letters and digits).  
 This file will be located in the `C:\LGS extension` folder and will contain human-readable data.  
-If two profiles have the same `D_filename` value then they share the same `D` table, that's why you might want to make these filenames different for every profile.  
+If two profiles have the same `D_filename` then they share the same `D` table, that's why you might want to make `D_filename` values different for every profile.  
 
-You can disable autosaving and autoloading of table `D` (for example, to avoid using my .EXE and .DLL files on your machine):  
- 1. Remove the assignment `D_filename = "..."` from `LGS_script_template.lua` line #184
+To avoid using my .EXE and .DLL files on your computer, you can turn **feature #5** off:  
+ 1. Remove the assignment `D_filename = "..."` from `LGS_script_template.lua` line #187
  2. (optional) Delete all the files from the folder `C:\LGS extension` except the main module `LGS_extension.lua`
  3. (optional) Delete the command **RUN_D_SAVER** from LGS/GHUB application.
 
@@ -199,16 +199,15 @@ You can disable autosaving and autoloading of table `D` (for example, to avoid u
 
 #### Step 1. Create folder `C:\LGS extension`
 
-#### Step 2. Copy the following 6 files into the folder `C:\LGS extension`
+#### Step 2. Copy the following 5 files into the folder `C:\LGS extension`
  ```
-Filename                    Description                                                  SHA256 sum
---------                    -----------                                                  ----------
-LGS_extension.lua           the main module                                              3E59E96847FB3453020C7BEF01F63647B949750D62A9AF091EF2E0B4F7DE78DE
-LGS Debug Interceptor.dll   downloaded from https://gondwanasoftware.net.au/lgsdi.shtml  53D88679B0432887A6C676F4683FFF316E23D869D6479FEDEEEF2E5A3E71D334
+Filename                    Description                                                  SHA256 sums of binary files
+--------                    -----------                                                  ---------------------------
+LGS_extension.lua           the main module
+D_SAVER.lua                 external script which actually writes table D to the file
 wluajit.exe                 windowless LuaJIT 2.1 x64 (doesn't create a console window)  E9C320E67020C2D85208AD449638BF1566C3ACE4CDA8024079B97C26833BF483
 lua51.dll                   LuaJIT DLL                                                   112CB858E8448B0E2A6A6EA5CF9A7C25CFD45AC8A8C1A4BA85ECB04B20C2DE88
-D_SAVER.lua                 external script which actually writes table D to the file    0599D33E99AF27EE4625711DA6BF01EB2EA89BF38BF0A2FBD97ADF0ACB819BA3
-luajit.exe                  LuaJIT (console-ish, to view stderr if something goes wrong) 0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
+luajit.exe                  LuaJIT 2.1 x64 (does create a console window)                0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 ```
 #### Step 3. Create new command
 The instructions are different for LGS and GHUB:  
@@ -241,21 +240,21 @@ DO NOT bind the **RUN_D_SAVER** command to any button, this command must not be 
     - Click **LAUNCH APPLICATION**
     - Select **luajit**
     - Click **SAVE**
-    - Select **SYSTEM** tab (in the row of tabs: _COMMANDS-KEYS-ACTIONS-MACROS-SYSTEM_)
-    - Click on **luajit** to enter macro editor
+    - Select **SYSTEM** tab
+    - Click **luajit** in the **Launch Application** list
     - Click **DELETE**
     - Click **YES** to confirm
     - *Important note:*  
 Now you have the **RUN_D_SAVER** macro on the **MACROS** tab.  
 NEVER manually assign this macro to any button, this macro must not be invoked by a human.
 
-#### Step 4. Use `LGS_script_template.lua` as a template for writing your own Lua script
+#### Step 4. Copy the content of `LGS_script_template.lua` into LGS/GHUB Lua script editor.
 
 ----
 
 ### How to move the folder `C:\LGS extension` to another location
  - Move all the files from `C:\LGS extension` to your new folder.
- - Change the path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #233.  
+ - Change the path in the assignment `extension_module_full_path = ...` in `LGS_script_template.lua` line #280.  
 _Please note that LGS and GHUB don't allow you to use non-English letters in string literals in your Lua script.  
 All symbols beyond 7-bit ASCII in your folder path must be converted to their Windows ANSI codes.  
 Example: `D:\Папка\LGS` should be written as either `path = "D:\\\207\224\239\234\224\\LGS"` or  
