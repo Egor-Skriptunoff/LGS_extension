@@ -201,13 +201,13 @@ To avoid using my .EXE and .DLL files on your computer, you can turn **feature #
 
 #### Step 2. Copy the following 5 files into the folder `C:\LGS extension`
  ```
-Filename                    Description                                                  SHA256 sums of binary files
---------                    -----------                                                  ---------------------------
-LGS_extension.lua           the main module
-D_SAVER.lua                 external script which actually writes table D to the file
-wluajit.exe                 windowless LuaJIT 2.1 x64 (doesn't create a console window)  E9C320E67020C2D85208AD449638BF1566C3ACE4CDA8024079B97C26833BF483
-lua51.dll                   LuaJIT DLL                                                   112CB858E8448B0E2A6A6EA5CF9A7C25CFD45AC8A8C1A4BA85ECB04B20C2DE88
-luajit.exe                  LuaJIT 2.1 x64 (does create a console window)                0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
+Filename            Description                                                  SHA256 sums of binary files
+--------            -----------                                                  ---------------------------
+LGS_extension.lua   the main module
+D_SAVER.lua         external script which actually writes table D to the file
+wluajit.exe         windowless LuaJIT 2.1 x64 (doesn't create a console window)  E9C320E67020C2D85208AD449638BF1566C3ACE4CDA8024079B97C26833BF483
+lua51.dll           LuaJIT DLL                                                   112CB858E8448B0E2A6A6EA5CF9A7C25CFD45AC8A8C1A4BA85ECB04B20C2DE88
+luajit.exe          LuaJIT 2.1 x64 (does create a console window)                0F593458024EB62035EC41342FC12DAA26108639E68D6236DCF3048E527AE6E5
 ```
 #### Step 3. Create new command
 The instructions are different for LGS and GHUB:  
