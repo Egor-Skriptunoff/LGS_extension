@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------------------------
 -- LGS_extension.lua
 ---------------------------------------------------------------------------------------------
--- This module is invoked by "LGS_script_template.lua"
--- The full path to this module must be assigned to variable "extension_module_full_path" (see "LGS_script_template.lua" line #233)
+-- This module is invoked by 'LGS_script_template.lua'
+-- The full path to this module must be assigned to variable 'extension_module_full_path', see 'LGS_script_template.lua' line #280
 
 local
    select, tostring, unpack, type, floor,      min,      max,      sqrt,      format,        byte,        char,        rep,        sub,        gsub,        concat      =
@@ -584,10 +584,10 @@ do
       local log4 = log(4)
 
       local function entropy_from_delta(delta)
-         -- 'delta' is a difference between two sequencial measurements of some integer parameter controlled by user (pixel coord of mouse, timer tick count)
+         -- 'delta' is a difference between two sequential measurements of some integer parameter controlled by user: mouse position, current time
          -- all bits except 3 highest might be considered random
-         delta = delta * delta
-         return delta < 25 and 0 or log(delta) / log4 - 3
+         delta = delta * delta / 64
+         return delta < 1 and 0 or log(delta) / log4
       end
 
       local prev_x, prev_y, prev_t
@@ -612,7 +612,7 @@ do
                end
                event, prev_x, prev_y, prev_t = 400, x, y, t
             end
-            if event >= 400 then  -- only 'pressed' events
+            if event >= 400 then  -- only 'pressed' events increase entropy
                refine32(t * 2^10 + event)
                mix16(x)
                refine32(c * 2^16 + d)
@@ -792,7 +792,9 @@ if D_filename then
    end
 
    function Load_table_D()
-      return execute_Lua_script(D_folder..D_filename, "ERROR loading table D from disk\n")
+      local table_d = execute_Lua_script(D_folder..D_filename, "ERROR loading table D from disk\n")
+      PlayMacro"RUN_D_SAVER_RND"
+      return table_d
    end
 
    local out94
@@ -914,9 +916,7 @@ if D_filename then
       if type(D) ~= "table" then
          return
       end
-      PlayMacro"RUN_D_SAVER"
       local prefix = "ESk"
-      local start_time = GetRunningTime()
       local prepared_messages = {}
       local current_message = {}
       local current_message_length = 0
@@ -930,7 +930,7 @@ if D_filename then
       end
 
       function out94(b)
-         if current_message_length == 1000 then
+         if current_message_length == 4000 then
             flush_message()
          end
          local L36 = chksum % 68719476736
@@ -976,10 +976,6 @@ if D_filename then
          out94(b)
       end
       flush_message()
-      local delay = 700 + start_time - GetRunningTime()
-      if delay > 0 then
-         Sleep_orig(delay)
-      end
       for j, mes in ipairs(prepared_messages) do
          OutputDebugMessage(prefix..(j == 1 and "-" or j % 10)..mes.."\n")
       end

@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------------------------
 -- D_SAVER.lua
 ---------------------------------------------------------------------------------------------
+-- This module was inspired by "LGS Debug Interceptor" project created by Peter from Gondwana Software
+-- https://gondwanasoftware.net.au/lgsdi.shtml
+
+local ffi = require"ffi"
+local psapi = ffi.load"psapi"
+local ffi_C = ffi.C
+local ffi_string = ffi.string
 local ipairs = ipairs
 local pairs = pairs
 local tonumber = tonumber
@@ -17,49 +24,128 @@ local gsub = string.gsub
 local match = string.match
 local rep = string.rep
 local sub = string.sub
+local lower = string.lower
 local table_sort = table.sort
 local table_concat = table.concat
 
-local ffi = require"ffi"
-local ffi_string = ffi.string
-
--- see https://gondwanasoftware.net.au/lgsdi.shtml about how to use "LGS Debug Interceptor"
 ffi.cdef[[
-typedef int (__stdcall *MessageCallbackType)(const char* message);
-typedef void (__stdcall *StatusCallbackType)(int status);
-int LGSDIConnectCallback(bool async, MessageCallbackType messageCallback, StatusCallbackType statusCallback);
+uint32_t EnumProcesses(uint32_t *, uint32_t, uint32_t *);
+void ** OpenProcess(uint32_t, uint32_t, uint32_t);
+uint32_t CloseHandle(void **);
+uint32_t GetModuleBaseNameA(void **, void **, void *, uint32_t);
+uint32_t DebugActiveProcess(uint32_t);
+uint32_t DebugActiveProcessStop(uint32_t);
+uint32_t DebugSetProcessKillOnExit(uint32_t);
+typedef struct {
+   uint32_t dwDebugEventCode;
+   uint32_t dwProcessId;
+   uint32_t dwThreadId;
+   union {
+      uint32_t ExceptionCode;
+      struct {
+         void **  hFile;
+         void **  hProcess;
+      } CreateProcessInfo;
+      struct {
+         void *   lpDebugStringData;
+         uint16_t fUnicode;
+         uint16_t nDebugStringLength;
+      } DebugString;
+   } u;
+} *LPDEBUG_EVENT;
+uint32_t WaitForDebugEvent(LPDEBUG_EVENT, uint32_t);
+uint32_t ContinueDebugEvent(uint32_t, uint32_t, uint32_t);
+uint32_t ReadProcessMemory(void **, void *, void *, size_t, size_t *);
 ]]
 
-local lgsdi = ffi.load"LGS Debug Interceptor"
+local DWORDS = ffi.typeof"uint32_t[?]"
+local block64K = DWORDS(16384)
+local DebugEvent = ffi.cast("LPDEBUG_EVENT", block64K)
+local block20 = DWORDS(5)
+local sizeof_block20 = ffi.sizeof(block20)
 
-local arrived_data = {}
-local message_no
-local prefix = "ESk"
+local PID
 
-local function messageCallback(message)
-   -- message contains only bytes 0x20..0x7E, without percent (0x25), this string was sent by 'OutputDebugMessage()' in LGS script
-   message = ffi_string(message)
-   if sub(message, 1, 4) == prefix..(message_no or "-") then
-      message_no = ((message_no or 1) + 1) % 10
-      arrived_data[#arrived_data + 1] = message
-      return 0
-   else
-      if message ~= "\n" then
-         arrived_data = nil
+if psapi.EnumProcesses(block64K, ffi.sizeof(block64K), block20) ~= 0 then
+   for j = 0, block20[0]/4 - 1 do
+      local next_PID = block64K[j]
+      local ProcessHandle = ffi_C.OpenProcess(0x0410, 0, next_PID) -- PROCESS_VM_READ | PROCESS_QUERY_INFORMATION
+      if ProcessHandle ~= nil then
+         local name_len = psapi.GetModuleBaseNameA(ProcessHandle, nil, block20, sizeof_block20)
+         ffi_C.CloseHandle(ProcessHandle)
+         local ProcessName = lower(ffi_string(block20, name_len))
+         if ProcessName == "lcore.exe" or ProcessName == "lghub_agent.exe" then -- either LGS or GHUB
+            PID = next_PID
+            break
+         end
       end
-      return 1
    end
 end
 
--- Receive all messages through callback function
-lgsdi.LGSDIConnectCallback(false, messageCallback, function() end)
+local timeout_msec = 0xFFFFFFFF  -- infinite waiting
+local arrived_data
+local message_no
+local prefix = "ESk"
+
+if PID and ffi_C.DebugActiveProcess(PID) ~= 0 then
+   ffi_C.DebugSetProcessKillOnExit(0)
+   arrived_data = {}
+   local ProcessHandle
+   repeat
+      local exit = ffi_C.WaitForDebugEvent(DebugEvent, timeout_msec) == 0
+      if exit then
+         arrived_data = nil
+      else
+         local ContinueStatus = 0x00010002  -- DBG_CONTINUE
+         local ThreadId = DebugEvent.dwThreadId
+         local info = DebugEvent.u.CreateProcessInfo
+         local DebugEventCode = DebugEvent.dwDebugEventCode
+         if DebugEventCode == 1 then      -- EXCEPTION_DEBUG_EVENT
+            local exception = DebugEvent.u.ExceptionCode
+            if exception ~= 0x80000003 then  -- EXCEPTION_BREAKPOINT
+               ContinueStatus = 0x80010001   -- DBG_EXCEPTION_NOT_HANDLED
+            end
+         elseif DebugEventCode == 3 then  -- CREATE_PROCESS_DEBUG_EVENT
+            ProcessHandle = info.hProcess
+            ffi_C.CloseHandle(info.hFile)
+         elseif DebugEventCode == 5 then  -- EXIT_PROCESS_DEBUG_EVENT
+            arrived_data = nil
+         elseif DebugEventCode == 6 then  -- LOAD_DLL_DEBUG_EVENT
+            ffi_C.CloseHandle(info.hFile)
+         elseif DebugEventCode == 8 then  -- OUTPUT_DEBUG_STRING_EVENT
+            info = DebugEvent.u.DebugString
+            local len = info.nDebugStringLength
+            if len ~= 0 and info.fUnicode == 0 then
+               if ffi_C.ReadProcessMemory(ProcessHandle, info.lpDebugStringData, block64K, len, nil) == 0 then
+                  arrived_data = nil
+               else
+                  local message = ffi_string(block64K, len - 1)
+                  if message == "\n" then
+                     exit = true
+                  elseif sub(message, 1, 3) == prefix then
+                     if sub(message, 4, 4) == tostring(message_no or "-") then
+                        message_no = ((message_no or 1) + 1) % 10
+                        arrived_data[#arrived_data + 1] = message
+                     else
+                        arrived_data = nil
+                     end
+                  end
+               end
+            end
+         end
+         ffi_C.ContinueDebugEvent(PID, ThreadId, ContinueStatus)
+      end
+   until exit or not arrived_data
+   ffi_C.DebugActiveProcessStop(PID)
+   ffi_C.CloseHandle(ProcessHandle)
+end
 
 -- process arrived data
 local queue
 if arrived_data then
    queue = {}
    for k = 1, #arrived_data do
-      local message = arrived_data[k]
+      local message = arrived_data[k] -- message contains only bytes 0x20..0x7E, without percent (0x25)
       arrived_data[k] = nil
       for j = 5, #message - 1 do
          local b = byte(message, j)
@@ -77,6 +163,7 @@ if arrived_data then
    end
    arrived_data = nil
 end
+
 if queue then
    -- Calculating checksum
    local chksum = 0
@@ -95,6 +182,7 @@ if queue then
       queue = nil
    end
 end
+
 if queue then
    local pos = 0
    local popped_string = {}
@@ -211,8 +299,8 @@ if queue then
    until #stack_of_tables_to_parse == 0
    queue = pos + 7 == #queue and {received_data = received_data, serialized_objects = serialized_objects}
 end
-if queue then
 
+if queue then
    local D = queue.received_data[1]
    local D_filename = queue.received_data[2]
    local already_serialized = queue.serialized_objects
