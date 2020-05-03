@@ -269,3 +269,26 @@ Example: `D:\Папка\LGS` should be written as either `path = "D:\\\207\224\2
      - Click **DELETE THIS MACRO**
      - Click **YES** to confirm
      - Create the command **RUN_D_SAVER** again: follow the instructions from _"Step 3. Create new command"_ in _"How to install"_ section above, but use your new folder path instead of `C:\LGS extension`
+
+----
+
+## Known issue:
+
+#### LGS does not generate `PROFILE_DEACTIVATED` event on Windows shutdown, so table `D` on disk is not updated for the last profile being active before turning your computer off (usually it's the "Default profile").
+
+Example:
+
+1. You're turning you computer on:  
+   - profile **Default profile** is activated.
+2. You're starting a game:  
+   - **Default profile** is deactivated, table `D` for **Default profile** is saved to disk in its `PROFILE_DEACTIVATED` event handler,
+   - **Your Game** profile is activated.
+3. You're exiting the game:  
+   - **Your Game** profile is deactivated, table `D` for **Your Game** is saved to disk in its `PROFILE_DEACTIVATED` event handler,
+   - **Default profile** is activated.
+4. You're shutting down the computer:  
+   - **Default profile** should be deactivated, but `PROFILE_DEACTIVATED` event is not generated (bug in LGS), so table `D` for **Default profile** is not updated on disk.
+
+This is LGS-only issue.  
+GHUB is OK, table `D` is updated always.
+
