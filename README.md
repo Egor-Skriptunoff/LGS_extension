@@ -278,15 +278,15 @@ Example: `D:\Папка\LGS` should be written as either `path = "D:\\\207\224\2
 
 Example:
 
-1. You're turning you computer on:  
-   - profile **Default profile** is activated.
+1. You're turning your computer on:  
+   - **Default profile** is activated.
 2. You're starting a game:  
    - **Default profile** is deactivated, table `D` for **Default profile** is saved to disk in its `PROFILE_DEACTIVATED` event handler,
    - **Your Game** profile is activated.
 3. You're exiting the game:  
    - **Your Game** profile is deactivated, table `D` for **Your Game** is saved to disk in its `PROFILE_DEACTIVATED` event handler,
    - **Default profile** is activated.
-4. You're shutting down the computer:  
+4. You're shutting down Windows:  
    - **Default profile** should be deactivated, but `PROFILE_DEACTIVATED` event is not generated (bug in LGS), so table `D` for **Default profile** is not updated on disk.
 
 This is LGS-only issue.  
