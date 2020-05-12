@@ -5,8 +5,8 @@
 -- The full path to this module must be assigned to variable 'extension_module_full_path', see 'LGS_script_template.lua' line #280
 
 local
-   select, tostring, unpack, type, floor,      min,      max,      sqrt,      format,        byte,        char,        rep,        sub,        gsub,        concat      =
-   select, tostring, unpack, type, math.floor, math.min, math.max, math.sqrt, string.format, string.byte, string.char, string.rep, string.sub, string.gsub, table.concat
+   select, tostring, type, floor,      min,      max,      sqrt,      format,        byte,        char,        rep,        sub,        gsub,        concat      =
+   select, tostring, type, math.floor, math.min, math.max, math.sqrt, string.format, string.byte, string.char, string.rep, string.sub, string.gsub, table.concat
 local
    MoveMouseRelative, MoveMouseTo, GetMousePosition, Sleep_orig, GetRunningTime, OutputLogMessage, OutputDebugMessage =
    MoveMouseRelative, MoveMouseTo, GetMousePosition, Sleep,      GetRunningTime, OutputLogMessage, OutputDebugMessage
@@ -924,13 +924,16 @@ if D_filename then
 
       local function flush_message()
          if current_message_length > 0 then
-            prepared_messages[#prepared_messages + 1] = char(unpack(current_message, 1, current_message_length))
+            for j = 1, current_message_length do
+               current_message[j] = char(current_message[j])
+            end
+            prepared_messages[#prepared_messages + 1] = concat(current_message, "", 1, current_message_length)
             current_message_length = 0
          end
       end
 
       function out94(b)
-         if current_message_length == 4000 then
+         if current_message_length == 60000 then
             flush_message()
          end
          local L36 = chksum % 68719476736
