@@ -793,7 +793,7 @@ if D_filename then
 
    function Load_table_D()
       local table_d = execute_Lua_script(D_folder..D_filename, "ERROR loading table D from disk\n")
-      PlayMacro"RUN_D_SAVER_RND"
+      PlayMacro"RUN_D_SAVER"
       return table_d
    end
 
