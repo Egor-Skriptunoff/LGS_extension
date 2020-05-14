@@ -30,9 +30,9 @@ local table_concat = table.concat
 
 ffi.cdef[[
 uint32_t EnumProcesses(uint32_t *, uint32_t, uint32_t *);
-void ** OpenProcess(uint32_t, uint32_t, uint32_t);
-uint32_t CloseHandle(void **);
-uint32_t GetModuleBaseNameA(void **, void **, void *, uint32_t);
+size_t OpenProcess(uint32_t, uint32_t, uint32_t);
+uint32_t CloseHandle(size_t);
+uint32_t GetModuleBaseNameA(size_t, size_t, void *, uint32_t);
 uint32_t DebugActiveProcess(uint32_t);
 uint32_t DebugActiveProcessStop(uint32_t);
 uint32_t DebugSetProcessKillOnExit(uint32_t);
@@ -43,19 +43,19 @@ typedef struct {
    union {
       uint32_t ExceptionCode;
       struct {
-         void **  hFile;
-         void **  hProcess;
-      } CreateProcessInfo;
+         size_t hFile;
+         size_t hProcess;
+      };
       struct {
          void *   lpDebugStringData;
          uint16_t fUnicode;
          uint16_t nDebugStringLength;
-      } DebugString;
-   } u;
-} *LPDEBUG_EVENT;
+      };
+   };
+} * LPDEBUG_EVENT;
 uint32_t WaitForDebugEvent(LPDEBUG_EVENT, uint32_t);
 uint32_t ContinueDebugEvent(uint32_t, uint32_t, uint32_t);
-uint32_t ReadProcessMemory(void **, void *, void *, size_t, size_t *);
+uint32_t ReadProcessMemory(size_t, void *, void *, size_t, size_t *);
 ]]
 
 local DWORDS = ffi.typeof"uint32_t[?]"
@@ -70,8 +70,8 @@ if psapi.EnumProcesses(block64K, ffi.sizeof(block64K), block20) ~= 0 then
    for j = 0, block20[0]/4 - 1 do
       local next_PID = block64K[j]
       local ProcessHandle = ffi_C.OpenProcess(0x0410, 0, next_PID) -- PROCESS_VM_READ | PROCESS_QUERY_INFORMATION
-      if ProcessHandle ~= nil then
-         local name_len = psapi.GetModuleBaseNameA(ProcessHandle, nil, block20, sizeof_block20)
+      if ProcessHandle ~= 0 then
+         local name_len = psapi.GetModuleBaseNameA(ProcessHandle, 0, block20, sizeof_block20)
          ffi_C.CloseHandle(ProcessHandle)
          local ProcessName = lower(ffi_string(block20, name_len))
          if ProcessName == "lcore.exe" or ProcessName == "lghub_agent.exe" then -- either LGS or GHUB
@@ -96,27 +96,25 @@ if PID and ffi_C.DebugActiveProcess(PID) ~= 0 then
       if exit then
          arrived_data = nil
       else
-         local ContinueStatus = 0x00010002  -- DBG_CONTINUE
+         local ContinueStatus = 0x00010002   -- DBG_CONTINUE
          local ThreadId = DebugEvent.dwThreadId
-         local info = DebugEvent.u.CreateProcessInfo
          local DebugEventCode = DebugEvent.dwDebugEventCode
-         if DebugEventCode == 1 then      -- EXCEPTION_DEBUG_EVENT
-            local exception = DebugEvent.u.ExceptionCode
+         if DebugEventCode == 1 then         -- EXCEPTION_DEBUG_EVENT
+            local exception = DebugEvent.ExceptionCode
             if exception ~= 0x80000003 then  -- EXCEPTION_BREAKPOINT
                ContinueStatus = 0x80010001   -- DBG_EXCEPTION_NOT_HANDLED
             end
-         elseif DebugEventCode == 3 then  -- CREATE_PROCESS_DEBUG_EVENT
-            ProcessHandle = info.hProcess
-            ffi_C.CloseHandle(info.hFile)
-         elseif DebugEventCode == 5 then  -- EXIT_PROCESS_DEBUG_EVENT
+         elseif DebugEventCode == 3 then     -- CREATE_PROCESS_DEBUG_EVENT
+            ProcessHandle = DebugEvent.hProcess
+            ffi_C.CloseHandle(DebugEvent.hFile)
+         elseif DebugEventCode == 5 then     -- EXIT_PROCESS_DEBUG_EVENT
             arrived_data = nil
-         elseif DebugEventCode == 6 then  -- LOAD_DLL_DEBUG_EVENT
-            ffi_C.CloseHandle(info.hFile)
-         elseif DebugEventCode == 8 then  -- OUTPUT_DEBUG_STRING_EVENT
-            info = DebugEvent.u.DebugString
-            local len = info.nDebugStringLength
-            if len ~= 0 and info.fUnicode == 0 then
-               if ffi_C.ReadProcessMemory(ProcessHandle, info.lpDebugStringData, block64K, len, nil) == 0 then
+         elseif DebugEventCode == 6 then     -- LOAD_DLL_DEBUG_EVENT
+            ffi_C.CloseHandle(DebugEvent.hFile)
+         elseif DebugEventCode == 8 then     -- OUTPUT_DEBUG_STRING_EVENT
+            local len = DebugEvent.nDebugStringLength
+            if len ~= 0 and DebugEvent.fUnicode == 0 then
+               if ffi_C.ReadProcessMemory(ProcessHandle, DebugEvent.lpDebugStringData, block64K, len, nil) == 0 then
                   arrived_data = nil
                else
                   local message = ffi_string(block64K, len - 1)
